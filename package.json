@@ -1,0 +1,27 @@
+{
+  "name": "oj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "tsc && node ./dist/index.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OcelotJungle/oj.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OcelotJungle/oj/issues"
+  },
+  "homepage": "https://github.com/OcelotJungle/oj#readme",
+  "dependencies": {
+    "dotenv": "^14.3.2",
+    "exceljs": "^4.3.0",
+    "moment": "^2.29.1",
+    "mongodb": "^4.3.1",
+    "telegraf": "^4.6.0"
+  }
+}

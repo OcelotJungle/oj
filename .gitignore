@@ -1,0 +1,7 @@
+
+/node_modules
+/dist
+/files
+.env
+test.js
+package-lock.json
