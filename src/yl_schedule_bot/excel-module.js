@@ -28,7 +28,16 @@ class Metadata {
             center: { horizontal: "center" }
         },
         colors: {
-            couriers: ["FFE2EFDA", "FFFCE4D6"],
+            couriers: [
+                {
+                    bike: "FFE2EFDA",
+                    car: "FFC4D79B"
+                },
+                {
+                    bike: "FFFCE4D6",
+                    car: "FFFABF8F"
+                }
+            ]
         },
         borders: {
             default: {
@@ -70,12 +79,13 @@ class Metadata {
 }
 
 class Courier {
-    constructor(name, days) {
+    constructor(name, days, type) {
         // const [name, ...days] = rawRecord.split("\t");
         
         this.name = name;
         this.days = days.map(day => !day.isWeekend ? new Day(day) : null);
         // this.days = days.map(day => day.length ? new Day(day) : null);
+        this.type = type;
         this.total = this.days.filter(day => day).reduce((sum, day) => sum + day.duration, 0);
     }
 }
@@ -124,7 +134,7 @@ class ExcelWorker {
         this.fillHeaders();
         this.fillCouriers(couriers);
         this.fillStats(weekdays);
-        this.applyStyles();
+        this.applyStyles(couriers);
 
         return this;
     }
@@ -145,7 +155,7 @@ class ExcelWorker {
 
         couriers.forEach((courier, i) => {
             totalHours += courier.total;
-            this.cell(i + 2, 1).value = courier.name;
+            this.cell(i + 2, 1).value = `${courier.name}${courier.type === "car" ? " (авто)" : ""}`;
             this.cell(i + 2, 10).value = courier.total;
             for(let day = 0; day < DAYS_IN_WEEK; day++)
                 if(courier.days[day]) this.cell(i + 2, day + 2).value = courier.days[day].toString();
@@ -162,7 +172,7 @@ class ExcelWorker {
         }
     }
     
-    applyStyles() {
+    applyStyles(couriers) {
         // Views
         this.sheet.views[0] = { zoomScale: 150 };
         
@@ -192,11 +202,12 @@ class ExcelWorker {
 
         // Colors
         for(let r = 2; r <= this.couriersPaneLength + 1; r++) {
+            const argb = Metadata.STYLES.colors.couriers[r % 2][couriers[r - 2]?.type ?? "bike"];
             for(let c = 1; c <= 10; c++) {
                 this.cell(r, c).fill = {
                     type: "pattern",
                     pattern: "solid",
-                    fgColor: { argb: Metadata.STYLES.colors.couriers[r % 2] }
+                    fgColor: { argb }
                 };
             }
         }
@@ -222,7 +233,7 @@ class ExcelWorker {
 function getCouriers(wishes) {
     return wishes
         .filter(wish => !wish.isWeekend)
-        .map(({ name, days }) => new Courier(name, days))
+        .map(({ name, days, type }) => new Courier(name, days, type))
         .sort((a, b) => b.total - a.total);
     // return wishes.map(raw => new Courier(raw)).sort((a, b) => b.total - a.total);
 }

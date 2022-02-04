@@ -193,7 +193,10 @@ export default class YLScheduleBot {
                 wishes: _wishes.map(({ _id, ...wish }) => wish)
             });
 
-            await toExcelFile(_wishes.map(wish => Wish.from(wish)), this.paths.excel);
+            await toExcelFile(await Promise.all(_wishes.map(async wish => {
+                const courier = await this.db.registry.findOne({ name: wish.name });
+                return { ...Wish.from(wish), type: courier?.type ?? "bike" };
+            })), this.paths.excel);
             await ctx.telegram.sendDocument(ctx.chat.id, { source: this.paths.excel });
         });
     }
