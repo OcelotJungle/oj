@@ -1,12 +1,4 @@
-export enum Weekday {
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY,
-    SUNDAY
-}
+import { Weekday } from "./complex/weekday";
 
 export class Timestamp {
     day: Weekday;

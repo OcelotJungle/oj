@@ -1,7 +1,7 @@
-export function sleep(delay: number = 0): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, delay));
-}
+import { sleep as _sleep } from "./promises";
+import { capitalize } from "./string";
+import { bound } from "./math";
 
-export function capitalize(str: string): string {
-    return `${str[0].toUpperCase()}${str.substring(1)}`;
-}
+global.sleep = _sleep;
+Math.bound = bound;
+String.prototype.capitalize = capitalize;
