@@ -1,8 +1,13 @@
+import { plainToInstance } from "class-transformer";
 import { Context } from "telegraf";
-import User from "../user";
+import { User } from "../models";
 
-export default async function getUser(ctx: Context, next: () => Promise<void>) {
-    const user = await global.dbs.ylScheduleBot.collection("registry").findOne({ username: ctx.message!.from.username });
-    ctx.state.user = user ? new User(user) : null;
-    next();
+export default async function getUser(ctx: Context, next?: () => Promise<void>) {
+    if(ctx.state.user === undefined) {
+        const username = ctx.message!.from.username;
+        const registry = global.dbs.ylScheduleBot.collection("registry");
+        ctx.state.user = plainToInstance(User, await registry.findOne({ username }));
+    }
+
+    if(next) next();
 }
