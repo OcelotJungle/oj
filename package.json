@@ -18,10 +18,14 @@
   },
   "homepage": "https://github.com/OcelotJungle/oj#readme",
   "dependencies": {
+    "class-transformer": "^0.5.1",
     "dotenv": "^14.3.2",
     "exceljs": "^4.3.0",
     "moment": "^2.29.1",
     "mongodb": "^4.3.1",
     "telegraf": "^4.6.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.2"
   }
 }
