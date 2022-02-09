@@ -161,8 +161,10 @@ export default class AdminChat extends Chat {
             await this.db.wishes.deleteMany({ "courier._id": user._id });
             await this.db.wishes.insertOne(wish);
 
-            await ctx.reply(ADDED_INTO_DB);
-            await ctx.reply(wish.toString());
+            await ctx.reply(
+                `${ADDED_INTO_DB}\n${wish.toString()}`,
+                { reply_to_message_id: ctx.message.message_id }
+            );
         });
     }
 
