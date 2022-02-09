@@ -2,6 +2,7 @@ import { AdminChat, CommonChat, CourierChat, WAChat } from "./chats";
 import { DbContainer } from "./types/db-container";
 import { State, Store } from "./persistent";
 import { MODULE_NAME } from "./consts";
+import { getUser } from "./middleware";
 import { Telegraf } from "telegraf";
 import { ObjectId } from "mongodb";
 import { User } from "./models";
@@ -84,10 +85,12 @@ export default class YLScheduleBot {
     }
 
     init() {
+        this.bot.use(getUser);
+
         this.chats.common._init();
         this.chats.admin._init();
-        // this.chats.courier.init();
-        // this.chats.wa.init();
+        // this.chats.courier._init();
+        // this.chats.wa._init();
 
         return this;
     }
