@@ -10,6 +10,10 @@ import Chat from "./chat";
 
 const ADDED_INTO_DB = "Добавлено в БД:";
 const NO_COURIER = "Курьера нет в БД:";
+const NO_USER = "Пользователя нет в БД:";
+const UNSUPPORTED_FIELD = "Неподдерживаемое поле:";
+const USER_EDITED = "Пользователь изменён:";
+const USER_DELETED = "Пользователь удалён:";
 const WISHES_DB_EMPTY = "В БД пожеланий ничего нет.";
 const WISHES_DB_DROPPED = "БД пожеланий сброшена.";
 
@@ -28,7 +32,10 @@ export default class AdminChat extends Chat {
     _init() {
         // this.init();
         // this.startAt();
+        this.getUser();
         this.addUser();
+        this.editUser();
+        this.deleteUser();
         this.addWish();
         this.drop();
         this.build();
@@ -63,21 +70,78 @@ export default class AdminChat extends Chat {
         // });
     }
 
+    private _parseField(key: string, raw: string): any {
+        switch(key) {
+            case "username": return raw.replace("@", "");
+            case "name": return raw;
+            case "type": return raw;
+            case "roles": return raw.split("/")
+        }
+    }
+
+    private getUser() {
+        this.bot.command("get", isDialogue, isAdmin, async ctx => {
+            const filter = ctx.message.text.replace(/^\/get /gi, "");
+
+            const _user = await this.db.registry.findOne({
+                $or: [
+                    { username: this._parseField("username", filter) },
+                    { name: this._parseField("name", filter) }
+                ]
+            });
+            if(!_user) return await ctx.reply(`${NO_USER} ${filter}.`);
+
+            const user = plainToInstance(User, _user);
+            await ctx.reply(`${user.toString()}, ${user.type}.`);
+        });
+    }
+
     private addUser() {
         this.bot.command("add", isDialogue, isAdmin, async ctx => {
             const msg = ctx.message.text.replace(/^\/add /gi, "").split(/,\s?/);
 
             const user = plainToInstance(User, {
-                username: msg[0].replace("@", ""),
-                name: msg[1],
-                type: msg[2] as CourierType,
-                roles: msg[3].split("/") as Role[]
+                username: this._parseField("username", msg[0]) as string,
+                name: this._parseField("name", msg[1]) as string,
+                type: this._parseField("type", msg[2]) as CourierType,
+                roles: this._parseField("roles", msg[3]) as Role[]
             });
 
             await this.db.registry.insertOne(user);
 
             await ctx.reply(ADDED_INTO_DB);
             await ctx.reply(`${user.toString()}, ${user.type}.`);
+        });
+    }
+
+    private editUser() {
+        this.bot.command("edit", isDialogue, isAdmin, async ctx => {
+            const msg = ctx.message.text.replace(/^\/edit /gi, "").split(/,\s?/);
+            const username = msg[0].replace("@", "");
+
+            const user = await this.db.registry.findOne({ username });
+            if(!user) return await ctx.reply(`${NO_USER} @${username}`);
+
+            const value = this._parseField(msg[1], msg[2]);
+            if(!value) return await ctx.reply(`${UNSUPPORTED_FIELD} ${msg[1]}`);
+
+            await this.db.registry.updateOne({ _id: user._id }, { $set: { [msg[1]]: value } });
+            await ctx.reply(`${USER_EDITED} @${username} (${msg[1]} = ${value.toString()})`);
+        });
+    }
+
+    private deleteUser() {
+        this.bot.command("delete", isDialogue, isAdmin, async ctx => {
+            const msg = ctx.message.text.replace(/^\/delete /gi, "").split(/,\s?/);
+            const username = msg[0].replace("@", "");
+
+            let answer: string;
+            if(await this.db.registry.findOne({ username })) {
+                await this.db.registry.deleteOne({ username });
+                answer = USER_DELETED;
+            } else answer = NO_USER;
+
+            await ctx.reply(`${answer} @${username}.`);
         });
     }
 
