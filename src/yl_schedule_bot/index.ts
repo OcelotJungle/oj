@@ -89,7 +89,7 @@ export default class YLScheduleBot {
 
         this.chats.common._init();
         this.chats.admin._init();
-        // this.chats.courier._init();
+        this.chats.courier._init();
         // this.chats.wa._init();
 
         return this;
