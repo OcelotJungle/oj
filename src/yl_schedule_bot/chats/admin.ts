@@ -3,6 +3,7 @@ import { DbContainer } from "../types/db-container";
 import { isAdmin, isDialogue } from "../middleware";
 import { Schedule, User, Wish } from "../models";
 import { CourierType, Role } from "../enums";
+import { WISH_LINE_REGEXP } from "../consts";
 import exportToExcel from "../excel-module";
 import { Telegraf } from "telegraf";
 import YLScheduleBot from "..";
@@ -146,8 +147,9 @@ export default class AdminChat extends Chat {
     }
 
     private addWish() {
-        // Wishes in a standard form
-        this.bot.hears(/(\p{L}+? \p{L}+?)\s*(\n\p{L}{2},? (.+))+/ugi, isDialogue, isAdmin, async ctx => {
+        // Wishes in a standard form (with name)
+        const wishesRegexp = new RegExp(`^(\\p{L}+? \\p{L}+?)\\s*(\\n${WISH_LINE_REGEXP})+`, "ugi");
+        this.bot.hears(wishesRegexp, isDialogue, isAdmin, async ctx => {
             const [name, ...days] = ctx.message.text.split("\n").map(v => v.trim());
 
             const user = await this.db.registry.findOne({ name });

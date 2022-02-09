@@ -14,3 +14,4 @@ export const ROLES: { [key in Role]: string } = {
     courier: "курьер",
     wa: "склад"
 }
+export const WISH_LINE_REGEXP = "(\\p{L}{2})[,:\\s]\\s*(.+-.+)";
