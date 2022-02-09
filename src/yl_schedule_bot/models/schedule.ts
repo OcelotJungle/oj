@@ -13,7 +13,7 @@ export default class Schedule {
             const day = new WishDay(raw);
             schedule.days[day.weekday] = day;
         }
-        iterateWeek(day => schedule.days[day] ?? WishDay.getEmptyWeekday(day));
+        iterateWeek(day => schedule.days[day] ??= WishDay.getEmptyWeekday(day));
 
         return schedule;
     }

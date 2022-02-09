@@ -5,8 +5,8 @@ export default class WorkingTime {
     end: number;
 
     get duration() { return this.end - this.start }
-    get isMorning() { return this.start <= MAX_MORNING_START_TIME }
-    get isEvening() { return this.end >= MIN_EVENING_END_TIME }
+    get isMorning() { return !this.isWeekend && this.start <= MAX_MORNING_START_TIME }
+    get isEvening() { return !this.isWeekend && this.end >= MIN_EVENING_END_TIME }
     get isWeekend() { return this.start === 0 || this.end === 0 }
 
     constructor(start?: string | number, end?: string | number) {

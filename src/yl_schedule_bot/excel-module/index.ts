@@ -22,9 +22,11 @@ function getCouriers(wishes: Wish[]) {
 function getWeekdays(couriers: Courier[]) {
     return new Array(DAYS_IN_WEEK).fill(42).map((_, i) => {
         return couriers.reduce((weekday, { days }) => {
-            if(days[i]) weekday.total++;
-            if(days[i].isMorning) weekday.morning++;
-            if(days[i].isEvening) weekday.evening++;
+            if(!days[i].isWeekend) {
+                weekday.total++;
+                if(days[i].isMorning) weekday.morning++;
+                if(days[i].isEvening) weekday.evening++;
+            }
             return weekday;
         }, new WeekdayStats());
     });
