@@ -4,3 +4,4 @@ export { default as isCourier } from "./is-courier";
 export { default as isWA } from "./is-wa";
 export { default as isDialogue } from "./is-dialogue";
 export { default as isGroup } from "./is-group";
+export { default as parseCmd } from "./parse-cmd";
