@@ -85,7 +85,7 @@ export class Weekdays {
     static _get(info: Info) {
         switch(typeof info) {
             case "number": return this._index(info);
-            case "string": return this._abbr(info) || this._name(info);
+            case "string": return this._abbr(info) ?? this._name(info);
             default: return this._weekday(info);
         }
     }
@@ -94,6 +94,7 @@ export class Weekdays {
     static _abbr(abbr: string) { return this.wds.find(wd => wd.data.abbrs.includes(abbr.toLowerCase())) }
     static _name(name: string) { return this.wds.find(wd => wd.data.names.includes(name.toLowerCase())) }
 
+    static getIndex(info: Info) { return this.get(info, true)!.data.index }
     static getRuAbbr(info: Info) { return this.get(info, true)!.data.abbrs[0] }
     static getRuName(info: Info) { return this.get(info, true)!.data.names[0] }
 }
