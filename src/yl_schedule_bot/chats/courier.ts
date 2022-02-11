@@ -1,4 +1,4 @@
-import { ADMIN_TG, WISH_LINE_REGEXP } from "../consts";
+import { ADMIN_TG, WISH_LINE_REGEXP_ANY, WISH_LINE_REGEXP_WORK } from "../consts";
 import { isCourier, isDialogue } from "../middleware";
 import { plainToInstance } from "class-transformer";
 import { DbContainer } from "../types/db-container";
@@ -25,14 +25,14 @@ export default class CourierChat extends Chat {
     
     private addWish() {
         // Wishes in a standard form (without name)
-        const wishesRegExp = new RegExp(`\\s*(${WISH_LINE_REGEXP}\\s*\\n?)+`, "ugi");
+        const wishesRegExp = new RegExp(`\\s*(${WISH_LINE_REGEXP_ANY}\\s*\\n?)+`, "ugi");
         this.bot.hears(wishesRegExp, isDialogue, isCourier, async ctx => {
             const msg = ctx.message.text.trim().split("\n");
 
             const days = (msg
                 .map(v => v.trim())
                 .map(v => v.replace(/\s+/g, " "))
-                .filter(v => new RegExp(`${WISH_LINE_REGEXP}`, "ugi").test(v))
+                .filter(v => new RegExp(WISH_LINE_REGEXP_WORK, "ugi").test(v))
             );
 
             const wish = plainToInstance(Wish, {

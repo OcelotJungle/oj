@@ -1,6 +1,6 @@
 import { Weekday, Weekdays } from "../../utils/complex/weekday";
+import { WISH_LINE_REGEXP_ANY } from "../consts";
 import { WorkingTime } from ".";
-import { WISH_LINE_REGEXP } from "../consts";
 
 export default class WishDay {
     weekday!: Weekday;
@@ -9,7 +9,7 @@ export default class WishDay {
     constructor(data?: string) {
         if(!data) return;
 
-        const matches = new RegExp(`^${WISH_LINE_REGEXP}$`, "ugi").exec(data);
+        const matches = new RegExp(`^${WISH_LINE_REGEXP_ANY}$`, "ugi").exec(data);
 
         if(!(matches?.length === 3)) throw new Error(`Invalid time period: '${data}'`);
 
