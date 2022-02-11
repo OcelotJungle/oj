@@ -1,4 +1,3 @@
-require("dotenv").config();
 require("moment/locale/ru");
 require("moment").locale("ru");
 
@@ -11,20 +10,27 @@ import fs from "fs/promises";
 import path from "path";
 
 class Controller {
-    fwd: string;
-    ylScheduleBot: YLScheduleBot;
+    fwd!: string;
+    ylScheduleBot!: YLScheduleBot;
 
-    constructor() {
-        if(!process.env.DYNAMIC_FILES_FOLDER?.length) throw new Error("Dynamic files folder is not set");
-        if(!process.env.PERSISTENT_STATE_FILE_NAME?.length) throw new Error("Persistent state file name is not set");
-        if(!process.env.PERSISTENT_STORE_FILE_NAME?.length) throw new Error("Persistent store file name is not set");
+    async preinit(config?: { dev: boolean }) {
+        const envFileName = `${(config?.dev ?? false) ? ".dev" : ""}.env`;
+        (await import("dotenv")).config({ path: path.join(process.cwd(), envFileName) });
 
-        this.fwd = path.join(process.cwd(), process.env.DYNAMIC_FILES_FOLDER);
+        this.validateEnv();
+
+        this.fwd = path.join(process.cwd(), process.env.DYNAMIC_FILES_FOLDER!);
 
         this.ylScheduleBot = new YLScheduleBot();
 
         process.once("SIGINT", async () => await this.stop("SIGINT"));
         process.once("SIGTERM", async () => await this.stop("SIGTERM"));
+    }
+
+    private validateEnv() {
+        if(!process.env.DYNAMIC_FILES_FOLDER?.length) throw new Error("Dynamic files folder is not set");
+        if(!process.env.PERSISTENT_STATE_FILE_NAME?.length) throw new Error("Persistent state file name is not set");
+        if(!process.env.PERSISTENT_STORE_FILE_NAME?.length) throw new Error("Persistent store file name is not set");
     }
 
     async init() {
@@ -58,7 +64,9 @@ class Controller {
 }
 
 (async () => {
+    const dev = process.argv.includes("dev");
     const controller = new Controller();
+    await controller.preinit({ dev });
     await controller.init();
     await controller.start();
 })();

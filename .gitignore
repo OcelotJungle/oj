@@ -3,5 +3,6 @@
 /dist
 /files
 .env
+.dev.env
 test.js
 package-lock.json

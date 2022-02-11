@@ -4,6 +4,8 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
+    "prod": "npm run start",
+    "dev": "npm run start dev",
     "start": "tsc && node ./dist/index.js",
     "test": "node test.js"
   },
