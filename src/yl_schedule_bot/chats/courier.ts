@@ -46,7 +46,7 @@ export default class CourierChat extends Chat {
     }
     
     private addWish() {
-        enum WishTimeStatus { TOO_EARLY, TOO_LATE, OK };
+        enum WishTimeStatus { TOO_EARLY, TOO_LATE, OK }
 
         const getWishTimeStatus = () => {
             const now = moment();

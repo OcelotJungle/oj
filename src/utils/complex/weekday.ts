@@ -77,9 +77,9 @@ export class Weekdays {
                 names: ["воскресенье", "sunday"]
             }
         }
-    ]
+    ];
 
-    static get(info: Info, fallback: boolean = true) {
+    static get(info: Info, fallback = true) {
         return this._get(info) ?? (fallback ? this._get(0) : undefined);
     }
     static _get(info: Info) {

@@ -1,9 +1,11 @@
-export default interface IPersistent {
+interface IPersistent {
     path: string;
 
-    update(data: any): void;
+    update(data: unknown): void;
     load(): void | never;
     save(): void | never;
 
-    updateAndSave(data: any): void;
+    updateAndSave(data: unknown): void;
 }
+
+export default IPersistent;

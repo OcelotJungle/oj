@@ -1,7 +1,7 @@
 export default function iterate(
     start: number,
     end: number,
-    fn: (value: number) => any,
+    fn: (value: number) => unknown,
     options: {
         inclusive?: boolean,
         step?: number

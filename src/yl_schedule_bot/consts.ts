@@ -13,7 +13,7 @@ export const ROLES: { [key in Role]: string } = {
     admin: "админ",
     courier: "курьер",
     wa: "склад"
-}
+};
 
 const WISH_LINE_REGEXP_START = "(\\p{L}{2})[,:\\s]\\s*";
 export const WISH_LINE_REGEXP_WORK = `${WISH_LINE_REGEXP_START}(.+-.+)`;

@@ -5,7 +5,7 @@ import { Schedule, User } from ".";
 export default class Wish {
     @Expose({ toClassOnly: true })
     @Transform(({ value, key, obj }) => obj[key] ?? value)
-    _id?: ObjectId;
+        _id?: ObjectId;
     courier!: User;
     schedule!: Schedule;
 

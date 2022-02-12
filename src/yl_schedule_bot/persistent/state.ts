@@ -8,9 +8,9 @@ import { Store } from ".";
 export default class State implements IPersistent {
     path: string;
 
-    isRestored: boolean = false;
+    isRestored = false;
     notificationMessageId: number | null = null;
-    isFinalTableMade: boolean = false;
+    isFinalTableMade = false;
     week: {
         start: Moment;
         end: Moment;
@@ -34,7 +34,6 @@ export default class State implements IPersistent {
 
     static getNewerState(a?: State, b?: State) {
         if(a && b) return a.week.start.isSameOrAfter(b.week.end) ? a : b;
-        // if(a && b) return b.week.end.diff(a.week.start, "second") <= 0 ? a : b;
         else if(a || b) return (a ?? b)!;
         else throw new Error("Both compared states are invalid");
     }
@@ -93,6 +92,7 @@ export default class State implements IPersistent {
     }
 
     async save() {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { path, isRestored, ...state } = this;
         await fs.writeFile(this.path, JSON.stringify(state, null, 4));
     }

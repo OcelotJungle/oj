@@ -22,7 +22,7 @@ export default class YLScheduleBot {
         admin: AdminChat,
         courier: CourierChat,
         wa: WAChat
-    }
+    };
     bot!: Telegraf;
     db!: DbContainer;
     store!: Store;
@@ -45,7 +45,7 @@ export default class YLScheduleBot {
             store: path.join(this.fwd, PERSISTENT_STORE_FILE_NAME!),
             state: path.join(this.fwd, PERSISTENT_STATE_FILE_NAME!),
             excel: path.join(this.fwd, YL_SCHEDULE_BOT_XLSX_FILE_NAME!)
-        }
+        };
 
         this.store = new Store(this.paths.store);
         this.state = new State(this.paths.state);

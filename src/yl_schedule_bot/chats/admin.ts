@@ -120,12 +120,12 @@ export default class AdminChat extends Chat {
         });
     }
 
-    private _parseField(key: string, raw: string): any {
+    private _parseField(key: string, raw: string) {
         switch(key) {
             case "username": return raw.replace("@", "");
             case "name": return raw;
             case "type": return raw;
-            case "roles": return raw.split("/")
+            case "roles": return raw.split("/");
         }
     }
 

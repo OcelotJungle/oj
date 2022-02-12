@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 require("moment/locale/ru");
 require("moment").locale("ru");
 
@@ -42,7 +43,7 @@ class Controller {
         await this.try("YL Schedule Bot", async () => await (await this.ylScheduleBot.preinit()).init());
     }
 
-    private async try(name: string, func: () => Promise<any>) {
+    private async try(name: string, func: () => Promise<unknown>) {
         try {
             func();
             console.log(`${name} started successfully.`);

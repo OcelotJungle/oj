@@ -2,7 +2,7 @@ import { iterateWeek } from "../utils";
 import { WishDay } from ".";
 
 export default class Schedule {
-    days: WishDay[] = new Array();
+    days: WishDay[] = [];
 
     get isWeekend() { return this.days.filter(day => !day.time.isWeekend).length !== 0 }
 

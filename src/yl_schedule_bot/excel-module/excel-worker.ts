@@ -31,7 +31,7 @@ export default class ExcelWorker {
         return this;
     }
 
-    private cell(r: number, c: number) { return this.sheet.getCell(r, c); }
+    private cell(r: number, c: number) { return this.sheet.getCell(r, c) }
 
     private fillHeaders() {
         iterateWeek(day => this.cell(1, day + 2).value = Weekdays.getRuName(day).capitalize());

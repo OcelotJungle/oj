@@ -16,7 +16,7 @@ function getCouriers(wishes: Wish[]) {
                 if(b.type === CourierType.CAR) return 1;
             }
             return 0;
-        })
+        });
 }
 
 function getWeekdays(couriers: Courier[]) {

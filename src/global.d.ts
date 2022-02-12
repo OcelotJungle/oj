@@ -1,6 +1,7 @@
+/* eslint-disable no-var */
+import { sleep as _sleep } from "./utils/promises";
 import { capitalize } from "./utils/string";
 import { Db, MongoClient } from "mongodb";
-import { sleep as _sleep } from "./utils/promises";
 import { bound } from "./utils/math";
 
 type Dbs = { ylScheduleBot: Db };
@@ -16,13 +17,13 @@ declare global {
             YL_SCHEDULE_BOT_DB_NAME?: string;
             YL_SCHEDULE_BOT_XLSX_FILE_NAME?: string;
         }
-    };
+    }
     interface String {
         capitalize: typeof capitalize;
-    };
+    }
     interface Math {
         bound: typeof bound;
-    };
+    }
     var sleep: typeof _sleep;
     var mongo: {
         client: MongoClient,
