@@ -75,6 +75,7 @@ export default class YLScheduleBot {
         await this.store.save();
 
         await this.state.load();
+        this.state.actualize(this.store);
         await this.state.save();
 
         return this;

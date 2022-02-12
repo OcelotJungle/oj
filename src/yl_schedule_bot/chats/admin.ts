@@ -1,12 +1,16 @@
 import { instanceToPlain, plainToInstance } from "class-transformer";
+import { TIMESTAMP_FORMAT, WISH_LINE_REGEXP_ANY } from "../consts";
+import { isAdmin, isDialogue, parseCmd } from "../middleware";
+import { Weekdays } from "../../utils/complex/weekday";
 import { DbContainer } from "../types/db-container";
-import { isAdmin, isDialogue } from "../middleware";
+import { setMomentTime } from "../../utils/moment";
+import { Timestamp } from "../../utils/timestamp";
 import { Schedule, User, Wish } from "../models";
 import { CourierType, Role } from "../enums";
-import { WISH_LINE_REGEXP } from "../consts";
 import exportToExcel from "../excel-module";
 import { Telegraf } from "telegraf";
 import YLScheduleBot from "..";
+import moment from "moment";
 import Chat from "./chat";
 
 const ADDED_INTO_DB = "Добавлено в БД:";
@@ -32,7 +36,7 @@ export default class AdminChat extends Chat {
 
     _init() {
         // this.init();
-        // this.startAt();
+        this.timings();
         this.getUser();
         this.addUser();
         this.editUser();
@@ -57,18 +61,36 @@ export default class AdminChat extends Chat {
         // });
     }
 
-    private startAt() {
-        // this.bot.hears(/^начало/ugi, async ctx => {
-        //     if(ctx.message.chat.type !== "private") return;
+    private timings() {
+        function parseTime(args: string[]) {
+            const day = Weekdays.getIndex(args[0]);
+            const time = setMomentTime(moment(), args[1]);
+            return new Timestamp(day, time.format(TIMESTAMP_FORMAT));
+        }
 
-        //     const user = await this._getUser(ctx);
-        //     if(!user?.isAdmin()) return;
+        function getReply({ day, time }: Timestamp) {
+            return `${Weekdays.getRuName(day)}, ${time}`;
+        }
 
-        //     const matches = /^начало.? (\p{L}{2}),? (\d{1,3})/ugi.exec(ctx.message.text);
-        //     if(matches?.length !== 3) return await ctx.reply("Неправильный ввод.");
+        this.bot.command("wish_start", isDialogue, isAdmin, parseCmd(2), async ctx => {
+            const start = parseTime(ctx.state.args);
+            await this.master.store.updateAndSave({ start });
+            await this.master.state.actualizeAndSave(this.master.store);
+            await ctx.reply(`Начало: ${getReply(start)}.`);
+        });
 
-            
-        // });
+        this.bot.command("wish_end", isDialogue, isAdmin, parseCmd(2), async ctx => {
+            const end = parseTime(ctx.state.args);
+            await this.master.store.updateAndSave({ end });
+            await this.master.state.actualizeAndSave(this.master.store);
+            await ctx.reply(`Окончание: ${getReply(end)}.`);
+        });
+
+        this.bot.command("wish_reset", isDialogue, isAdmin, async ctx => {
+            await this.master.store.updateAndSave({ start: null, end: null });
+            await this.master.state.actualizeAndSave(this.master.store);
+            await ctx.reply("Тайминги сброшены.");
+        });
     }
 
     private _parseField(key: string, raw: string): any {
@@ -148,7 +170,6 @@ export default class AdminChat extends Chat {
 
     private addWish() {
         // Wishes in a standard form (with name)
-        const wishesRegexp = new RegExp(`^(\\p{L}+? \\p{L}+?)\\s*(\\n${WISH_LINE_REGEXP})+`, "ugi");
         const wishesRegexp = new RegExp(`^(\\p{L}+? \\p{L}+?)\\s*(\\n${WISH_LINE_REGEXP_ANY})+`, "ugi");
         this.bot.hears(wishesRegexp, isDialogue, isAdmin, async ctx => {
             const [name, ...days] = ctx.message.text.split("\n").map(v => v.trim());

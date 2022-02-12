@@ -18,3 +18,5 @@ export const ROLES: { [key in Role]: string } = {
 const WISH_LINE_REGEXP_START = "(\\p{L}{2})[,:\\s]\\s*";
 export const WISH_LINE_REGEXP_WORK = `${WISH_LINE_REGEXP_START}(.+-.+)`;
 export const WISH_LINE_REGEXP_ANY = `${WISH_LINE_REGEXP_START}(.+?)`;
+
+export const TIMESTAMP_FORMAT = "HH:mm:ssZ";

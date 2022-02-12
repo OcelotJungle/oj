@@ -3,34 +3,34 @@ import { Timestamp } from "../../utils/timestamp";
 import fs from "fs/promises";
 
 export default class Store implements IPersistent {
-    path!: string;
+    path: string;
 
-    whGroupChatId?: number;
-    start?: Timestamp;
-    end?: Timestamp;
+    whGroupChatId: number | null = null;
+    start: Timestamp | null = null;
+    end: Timestamp | null = null;
 
     constructor(path: string) { this.path = path }
 
     static from(raw: Partial<Store>) {
-        const store = Object.create(Store) as Store;
+        const store = Object.create(Store.prototype) as Store;
 
-        store.whGroupChatId = raw.whGroupChatId;
-        store.start = raw.start;
-        store.end = raw.end;
+        store.whGroupChatId = raw.whGroupChatId ?? null;
+        store.start = raw.start ? new Timestamp(raw.start.day, raw.start.time) : null;
+        store.end = raw.end ? new Timestamp(raw.end.day, raw.end.time) : null;
 
         return store;
     }
 
-    update(store?: Partial<Store>) {
-        this.whGroupChatId = store?.whGroupChatId ?? this.whGroupChatId;
-        this.start = store?.start ?? this.start;
-        this.end = store?.end ?? this.end;
+    update(store: Partial<Store>) {
+        if(store.whGroupChatId !== undefined) this.whGroupChatId = store.whGroupChatId;
+        if(store.start !== undefined) this.start = store.start;
+        if(store.end !== undefined) this.end = store.end;
     }
 
     async load() {
         try {
-            const store = JSON.parse((await fs.readFile(this.path)).toString()) as Store;
-            this.update(store);
+            const store = JSON.parse((await fs.readFile(this.path)).toString());
+            this.update(Store.from(store));
         } catch(e) {}
     }
 

@@ -2,10 +2,10 @@ import { Weekday } from "./complex/weekday";
 
 export class Timestamp {
     day: Weekday;
-    hour: number;
+    time: string;
 
-    constructor(day: Weekday, hour: number) {
+    constructor(day: Weekday, time: string) {
         this.day = day;
-        this.hour = hour;
+        this.time = time;
     }
 }
