@@ -6,6 +6,7 @@ import { Schedule, Wish } from "../models";
 import { Telegraf } from "telegraf";
 import { Role } from "../enums";
 import YLScheduleBot from "..";
+import moment from "moment";
 import Chat from "./chat";
 
 export default class CourierChat extends Chat {
@@ -45,9 +46,28 @@ export default class CourierChat extends Chat {
     }
     
     private addWish() {
+        enum WishTimeStatus { TOO_EARLY, TOO_LATE, OK };
+
+        const getWishTimeStatus = () => {
+            const now = moment();
+            const { start, end } = this.master.state.wish;
+            switch(true) {
+                case now.isBefore(start): return WishTimeStatus.TOO_EARLY;
+                case now.isAfter(end): return WishTimeStatus.TOO_LATE;
+                default: return WishTimeStatus.OK;
+            }
+        };
+
         // Wishes in a standard form (without name)
-        const wishesRegExp = new RegExp(`\\s*(${WISH_LINE_REGEXP_ANY}\\s*\\n?)+`, "ugi");
+        const wishesRegExp = new RegExp(`^\\s*(${WISH_LINE_REGEXP_ANY}\\s*\\n?)+`, "ugi");
         this.bot.hears(wishesRegExp, isDialogue, isCourier, async ctx => {
+            switch(getWishTimeStatus()) {
+                case WishTimeStatus.TOO_EARLY:
+                    return await ctx.reply("Приём пожеланий ещё не ведётся, напишите позже.");
+                case WishTimeStatus.TOO_LATE:
+                    return await ctx.reply(`Приём пожеланий уже окончен, напишите ${ADMIN_TG}.`);
+            }
+
             const msg = ctx.message.text.trim().split("\n");
 
             const days = (msg
@@ -70,6 +90,6 @@ export default class CourierChat extends Chat {
                 `Если всё верно, но результат неправильный, напишите ${ADMIN_TG}.`,
                 { reply_to_message_id: ctx.message.message_id }
             );
-        })
+        });
     }
 }
