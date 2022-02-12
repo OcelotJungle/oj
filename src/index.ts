@@ -39,7 +39,7 @@ class Controller {
         try { await fs.mkdir(this.fwd) }
         catch(e) {}
 
-        await this.try("YL Schedule Bot", async () => (await this.ylScheduleBot.preinit()).init());
+        await this.try("YL Schedule Bot", async () => await (await this.ylScheduleBot.preinit()).init());
     }
 
     private async try(name: string, func: () => Promise<any>) {

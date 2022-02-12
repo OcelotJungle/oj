@@ -34,7 +34,8 @@ export default class AdminChat extends Chat {
         this.db = this.master.db;
     }
 
-    _init() {
+    async _init() {
+        await this._cmds();
         // this.init();
         this.timings();
         this.getUser();
@@ -42,8 +43,34 @@ export default class AdminChat extends Chat {
         this.editUser();
         this.deleteUser();
         this.addWish();
-        this.drop();
-        this.build();
+        this.dropWishes();
+        this.excel();
+    }
+
+    protected async _cmds() {
+        const admins = await this.db.registry.find({
+            chatId: { $type: "number" },
+            roles: Role.ADMIN
+        }, { projection: { _id: 0, chatId: 1 } }).toArray();
+
+        for(const { chatId } of admins) {
+            this.bot.telegram.setMyCommands([
+                { command: "start_wish", description: "<день>, <время> - задать время начала приёма пожеланий" },
+                { command: "end_wish", description: "<день>, <время> - задать время окончания приёма пожеланий" },
+                { command: "reset_wish", description: "- сбросить время начала и окончания приёма пожеланий" },
+                { command: "get_user", description: "<имя/ник> - получить пользователя" },
+                { command: "add_user", description: "<ник>, <имя>, <тип>, <роли> - добавить пользователя" },
+                { command: "edit_user", description: "<ник>, <поле>, <новое значение> - изменить пользователя" },
+                { command: "delete_user", description: "<ник> - удалить пользователя" },
+                { command: "drop_wishes", description: "- очистить список пожеланий" },
+                { command: "excel", description: "- получить итоговую таблицу" }
+            ], {
+                scope: {
+                    type: "chat",
+                    chat_id: chatId
+                }
+            });
+        }
     }
 
     private init() {
@@ -72,21 +99,21 @@ export default class AdminChat extends Chat {
             return `${Weekdays.getRuName(day)}, ${time}`;
         }
 
-        this.bot.command("wish_start", isDialogue, isAdmin, parseCmd(2), async ctx => {
+        this.bot.command("start_wish", isDialogue, isAdmin, parseCmd(2), async ctx => {
             const start = parseTime(ctx.state.args);
             await this.master.store.updateAndSave({ start });
             await this.master.state.actualizeAndSave(this.master.store);
             await ctx.reply(`Начало: ${getReply(start)}.`);
         });
 
-        this.bot.command("wish_end", isDialogue, isAdmin, parseCmd(2), async ctx => {
+        this.bot.command("end_wish", isDialogue, isAdmin, parseCmd(2), async ctx => {
             const end = parseTime(ctx.state.args);
             await this.master.store.updateAndSave({ end });
             await this.master.state.actualizeAndSave(this.master.store);
             await ctx.reply(`Окончание: ${getReply(end)}.`);
         });
 
-        this.bot.command("wish_reset", isDialogue, isAdmin, async ctx => {
+        this.bot.command("reset_wish", isDialogue, isAdmin, async ctx => {
             await this.master.store.updateAndSave({ start: null, end: null });
             await this.master.state.actualizeAndSave(this.master.store);
             await ctx.reply("Тайминги сброшены.");
@@ -103,8 +130,8 @@ export default class AdminChat extends Chat {
     }
 
     private getUser() {
-        this.bot.command("get", isDialogue, isAdmin, async ctx => {
-            const filter = ctx.message.text.replace(/^\/get /gi, "");
+        this.bot.command("get_user", isDialogue, isAdmin, parseCmd(1), async ctx => {
+            const filter = ctx.state.args[0];
 
             const _user = await this.db.registry.findOne({
                 $or: [
@@ -120,14 +147,12 @@ export default class AdminChat extends Chat {
     }
 
     private addUser() {
-        this.bot.command("add", isDialogue, isAdmin, async ctx => {
-            const msg = ctx.message.text.replace(/^\/add /gi, "").split(/,\s?/);
-
+        this.bot.command("add_user", isDialogue, isAdmin, parseCmd(4), async ctx => {
             const user = plainToInstance(User, {
-                username: this._parseField("username", msg[0]) as string,
-                name: this._parseField("name", msg[1]) as string,
-                type: this._parseField("type", msg[2]) as CourierType,
-                roles: this._parseField("roles", msg[3]) as Role[]
+                username: this._parseField("username", ctx.state.args[0]) as string,
+                name: this._parseField("name", ctx.state.args[1]) as string,
+                type: this._parseField("type", ctx.state.args[2]) as CourierType,
+                roles: this._parseField("roles", ctx.state.args[3]) as Role[]
             });
 
             await this.db.registry.insertOne(user);
@@ -138,25 +163,24 @@ export default class AdminChat extends Chat {
     }
 
     private editUser() {
-        this.bot.command("edit", isDialogue, isAdmin, async ctx => {
-            const msg = ctx.message.text.replace(/^\/edit /gi, "").split(/,\s?/);
-            const username = msg[0].replace("@", "");
-
+        this.bot.command("edit_user", isDialogue, isAdmin, parseCmd(3), async ctx => {
+            const username = ctx.state.args[0].replace("@", "");
+            
             const user = await this.db.registry.findOne({ username });
             if(!user) return await ctx.reply(`${NO_USER} @${username}`);
+            
+            const field = ctx.state.args[1];
+            const value = this._parseField(field, ctx.state.args[2]);
+            if(!value) return await ctx.reply(`${UNSUPPORTED_FIELD} ${field}`);
 
-            const value = this._parseField(msg[1], msg[2]);
-            if(!value) return await ctx.reply(`${UNSUPPORTED_FIELD} ${msg[1]}`);
-
-            await this.db.registry.updateOne({ _id: user._id }, { $set: { [msg[1]]: value } });
-            await ctx.reply(`${USER_EDITED} @${username} (${msg[1]} = ${value.toString()})`);
+            await this.db.registry.updateOne({ _id: user._id }, { $set: { [field]: value } });
+            await ctx.reply(`${USER_EDITED} @${username} (${field} => ${value.toString()}).`);
         });
     }
 
     private deleteUser() {
-        this.bot.command("delete", isDialogue, isAdmin, async ctx => {
-            const msg = ctx.message.text.replace(/^\/delete /gi, "").split(/,\s?/);
-            const username = msg[0].replace("@", "");
+        this.bot.command("delete_user", isDialogue, isAdmin, parseCmd(1), async ctx => {
+            const username = ctx.state.args[0].replace("@", "");
 
             let answer: string;
             if(await this.db.registry.findOne({ username })) {
@@ -189,8 +213,8 @@ export default class AdminChat extends Chat {
         });
     }
 
-    private drop() {
-        this.bot.command("drop", isDialogue, isAdmin, async ctx => {
+    private dropWishes() {
+        this.bot.command("drop_wishes", isDialogue, isAdmin, async ctx => {
             if(await this.db.wishes.estimatedDocumentCount() === 0) 
                 return await ctx.reply(WISHES_DB_EMPTY);
 
@@ -199,8 +223,8 @@ export default class AdminChat extends Chat {
         });
     }
 
-    private build() {
-        this.bot.command("build", isDialogue, isAdmin, async ctx => {
+    private excel() {
+        this.bot.command("excel", isDialogue, isAdmin, async ctx => {
             if(await this.db.wishes.estimatedDocumentCount() === 0)
                 return await ctx.reply(WISHES_DB_EMPTY);
 

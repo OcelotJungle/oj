@@ -17,7 +17,15 @@ export default class CommonChat extends Chat {
     }
 
     _init() {
+        this._cmds();
         this.start();
+    }
+
+    protected _cmds() {
+        this.bot.telegram.setMyCommands([
+            { command: "start", description: "- показать информацию обо мне" },
+            { command: "stats", description: "- показать текущую статистику по дням [WIP]" }
+        ], { scope: { type: "default" } });
     }
 
     private start() {
@@ -26,7 +34,10 @@ export default class CommonChat extends Chat {
             
             const user = plainToInstance(User, ctx.state.user);
             
-            await this.master.updateUser(user._id!, { chatId: ctx.message.chat.id });
+            await this.master.updateUser(user._id!, {
+                userId: ctx.message.from.id,
+                chatId: ctx.message.chat.id
+            });
 
             await ctx.reply(`${user.toString()}.`);
             await ctx.reply(`Если есть ошибка, напишите ${ADMIN_TG}.`);

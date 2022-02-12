@@ -85,12 +85,12 @@ export default class YLScheduleBot {
         await this.db.registry.updateOne({ _id }, { $set: data });
     }
 
-    init() {
+    async init() {
         this.bot.use(getUser);
 
         this.chats.common._init();
-        this.chats.admin._init();
-        this.chats.courier._init();
+        await this.chats.admin._init();
+        await this.chats.courier._init();
         // this.chats.wa._init();
 
         return this;

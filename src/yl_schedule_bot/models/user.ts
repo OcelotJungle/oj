@@ -5,6 +5,7 @@ import { ROLES } from "../consts";
 
 export default class User {
     @Transform(({ key, obj }) => obj[key]) _id?: ObjectId;
+    userId?: number;
     chatId?: number;
     statsMessageId?: number;
     username!: string;

@@ -13,4 +13,6 @@ export default class WAChat extends Chat {
     }
 
     _init() {}
+
+    protected _cmds() {}
 }

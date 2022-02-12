@@ -6,4 +6,5 @@ export default abstract class Chat {
     abstract bot: Telegraf;
 
     abstract _init(): void;
+    protected abstract _cmds(): void;
 }

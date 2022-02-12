@@ -4,6 +4,7 @@ import { plainToInstance } from "class-transformer";
 import { DbContainer } from "../types/db-container";
 import { Schedule, Wish } from "../models";
 import { Telegraf } from "telegraf";
+import { Role } from "../enums";
 import YLScheduleBot from "..";
 import Chat from "./chat";
 
@@ -19,8 +20,28 @@ export default class CourierChat extends Chat {
         this.db = this.master.db;
     }
 
-    _init() {
+    async _init() {
+        // await this._cmds();
         this.addWish();
+    }
+    
+    protected async _cmds() {
+        const couriers = await this.db.registry.find({
+            chatId: { $type: "number" },
+            roles: Role.COURIER
+        }, { projection: { _id: 0, chatId: 1 } }).toArray();
+
+        for(const { chatId } of couriers) {
+            this.bot.telegram.setMyCommands([
+                { command: "notify_on", description: "- включить уведомления о начале сбора пожеланий [WIP]" },
+                { command: "notify_off", description: "- выключить уведомления о начале сбора пожеланий [WIP]" }
+            ], {
+                scope: {
+                    type: "chat",
+                    chat_id: chatId
+                }
+            });
+        }
     }
     
     private addWish() {
