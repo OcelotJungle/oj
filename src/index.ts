@@ -29,9 +29,12 @@ class Controller {
     }
 
     private validateEnv() {
-        if(!process.env.DYNAMIC_FILES_FOLDER?.length) throw new Error("Dynamic files folder is not set");
-        if(!process.env.PERSISTENT_STATE_FILE_NAME?.length) throw new Error("Persistent state file name is not set");
-        if(!process.env.PERSISTENT_STORE_FILE_NAME?.length) throw new Error("Persistent store file name is not set");
+        if(!process.env.DYNAMIC_FILES_FOLDER?.length)
+            throw new Error("Dynamic files folder is not set");
+        if(!process.env.PERSISTENT_STATE_FILE_NAME?.length)
+            throw new Error("Persistent state file name is not set");
+        if(!process.env.PERSISTENT_STORE_FILE_NAME?.length)
+            throw new Error("Persistent store file name is not set");
     }
 
     async init() {
