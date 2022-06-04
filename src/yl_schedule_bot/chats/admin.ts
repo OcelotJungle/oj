@@ -148,9 +148,9 @@ export default class AdminChat extends Chat {
 
     private addWish() {
         // Wishes in a standard form (with name)
-        const wishesRegexp = new RegExp(`^(\\p{L}+? \\p{L}+?)\\s*(\\n${WISH_LINE_REGEXP})+`, "ugi");
+        const wishesRegexp = new RegExp(`^(\\p{L}+?\\s+\\p{L}+?)\\s*(\\n${WISH_LINE_REGEXP})+`, "ugi");
         this.bot.hears(wishesRegexp, isDialogue, isAdmin, async ctx => {
-            const [name, ...days] = ctx.message.text.split("\n").map(v => v.trim());
+            const [name, ...days] = ctx.message.text.replace(/\s{2,}/, " ").split("\n").map(v => v.trim());
 
             const user = await this.db.registry.findOne({ name });
             if(!user) return await ctx.reply(`${NO_COURIER} "${name}".`);
